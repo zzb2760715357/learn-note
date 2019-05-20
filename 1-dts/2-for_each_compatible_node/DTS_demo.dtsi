@@ -1,0 +1,16 @@
+/{
+        DTS_demo {
+                compatible = "DTS_demo";
+                status = "okay";
+        };
+	DTS_demoX{
+                compatible = "DTS_demo";
+		status = "disabled";
+	};
+
+	DTS_demoY {
+                compatible = "DTS_demo";
+		status = "disabled";
+	};
+
+};
