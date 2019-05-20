@@ -1,0 +1,16 @@
+/{
+        DTS_demo {
+                compatible = "DTS_demo, BiscuitOS";
+                status = "okay";
+
+                child0 {
+                        compatible = "Child0, BiscuitOS";
+                        status = "disabled";
+                };
+
+                child1 {
+                        compatbile = "Child1, BiscuitOS";
+                        status = "okay";
+                };
+        };
+};
