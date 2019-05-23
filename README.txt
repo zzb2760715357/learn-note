@@ -6,3 +6,7 @@
 |   |
 |   |---3_for_each_matching_node_and_match                  通过 device_id 列表获得指定的 device node 和 device id
 |
+|
+|
+|---2-qcom                                                  高通相关资料
+|
