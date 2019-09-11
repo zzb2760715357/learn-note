@@ -19,3 +19,9 @@
 |   |---4-高通sensor.md                                     高通平台sensor框架图
 |   |
 |   |---5-qxdm抓取sensor-log.md                             高通sensor抓取log
+|
+|
+|
+|---3-mtk
+|   |
+|   |---1-selinux.md                                        MTK的selinux
