@@ -39,6 +39,9 @@
 |---5-bengshushu 
 |   |
 |   |---1-gcc-test                                          GCC编译过程实验
+|   |
+|   |---2-kernel-list-test                                  内核链表的应用
+|
 | 
 |
 |---vimrc                                                   vimrc配置文件
