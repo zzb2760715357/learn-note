@@ -70,11 +70,12 @@ kset:对象管理集合
 kobj_type:给结构体提供了与sysfs文件系统的接口。  
 kref:引用计数  
 
-2.4 字节序
+2.4 字节序  
 大端序：最高有效字节存储在最低地址。  
 小端序：最低有效字节存储在最低地址。 
 cpu_to_le64将64位数据类型转换为小端序格式，le64_to_cpu所做的刚好相反。
 ![字节序](https://github.com/zzb2760715357/Picture/blob/master/1-Dive_into_the_Linux_kernel_architecture/1-chapter/5.jpg)  
+
 
 
 
