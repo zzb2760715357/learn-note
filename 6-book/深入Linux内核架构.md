@@ -76,6 +76,8 @@ kref:引用计数
 cpu_to_le64将64位数据类型转换为小端序格式，le64_to_cpu所做的刚好相反。
 ![字节序](https://github.com/zzb2760715357/Picture/blob/master/1-Dive_into_the_Linux_kernel_architecture/1-chapter/5.jpg)  
 
+### 第二章 进程管理和调度
+
 
 
 
