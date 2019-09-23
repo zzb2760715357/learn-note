@@ -42,6 +42,10 @@
 |   |
 |   |---2-kernel-list-test                                  内核链表的应用
 |
+|
+|---6-book
+|   |
+|   |---深入Linux内核架构.md                                 深入Linux内核架构学习笔记
 | 
 |
 |---vimrc                                                   vimrc配置文件
