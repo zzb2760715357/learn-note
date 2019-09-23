@@ -15,4 +15,5 @@ offset:指定页内部的一个字节位置.
 
 1.8 物理内存的分配  
 伙伴系统:作用快速检测内存中连续的区域。内核对所有大小相同的伙伴，都放置到同一个列表中管理。  
-![伙伴系统](https://github.com/zzb2760715357/Picture/blob/master/1-%E6%B7%B1%E5%85%A5Linux%E5%86%85%E6%A0%B8%E6%9E%B6%E6%9E%84/%E7%AC%AC%E4%B8%80%E7%AB%A0/1.jpg)
+![伙伴系统](https://github.com/zzb2760715357/Picture/blob/master/1-Dive_into_the_Linux_kernel_architecture/1-chapter/1.jpg)  
+
