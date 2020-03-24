@@ -20,7 +20,6 @@
 |   |
 |   |---5-qxdm抓取sensor-log.md                             高通sensor抓取log
 |   |
-|   |
 |   |---6-QCOM-LCD-Bringup.md                               总结LCD、TP相关的调试总结
 |
 |
