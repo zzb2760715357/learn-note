@@ -304,22 +304,104 @@
 					input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, false);
 					input_sync(data->input_dev);
 
-	5. 固件升级流程
+### 固件升级流程
+	fts_fwupg_init
+		fts_esdcheck_switch(DISABLE);     //关闭ESD功能
+		INIT_WORK(&ts_data->fwupg_work, fts_fwupg_work);
+			fts_fwupg_work
+				fts_fwupg_get_fw_file
+					fts_fwupg_get_module_info   //  进行固件升级之前要先检测是否跟模组匹配才能够进行
+				fts_get_fw_file_via_request_firmware
+					request_firmware            //  加载固件
+				fts_get_fw_file_via_i   
+			fts_fw_download                     // 下载固件
+				fts_irq_disable                 // 禁止中断
+				fts_esdcheck_switch(DISABLE);   // 关闭 ESD
+				fts_fw_write_start(buf, len, need_reset);   // 烧写之前读取的固件
+					fts_enter_into_boot         // 进入固件升级模式
+					fts_pram_write_ecc          // 写参数
+					fts_pram_start
+				fts_esdcheck_switch(ENABLE);    // 打开ESD功能
+### 内核通知链表(http://bbs.chinaunix.net/thread-2011776-1-1.html)
+	作用：linux内核的各个子系统是相互独立的, 为了让一个子系统发生的事件能够让其他的子系统收到消息，Linux内核提供了通知链的机制。
+	通知链表数据结构:
+	struct notifier_block
+	{
+	    int (*notifier_call)(struct notifier_block *self, unsigned long, void *);
+	    struct notifier_block *next;
+	    int priority;
+	};
+	注册通知链的函数
+	int notifier_chain_register(struct notifier_block **nl, struct notifier_block *n)
+	int notifier_chain_unregister(strut notifier_block **nl, struct notifier_block *n)
+	通知函数
+	int notifier_call_chain(struct notifier_block **nl, unsigned long val, void *v)
 
-
-	6. TP的数据是如何跟LCD的关联起来
-	7. 虚拟按键的原理，就是在处理TP数据的时候，判断一下，TP触摸的点十分在这个区域如果在这个区域就上报对应的按键值
+	通知链的实验，定义一个通知链的链表头，将要执行的函数注册到通知链中.由另外一个子系统来通知通知链
 	
-					    
-
-
-
-
-
 	
 
+### TP的数据是如何跟LCD进行交互
+	Display 背光通知TP suspend和resume 的过程
+	(https://www.cnblogs.com/sky-heaven/p/10765196.html)
+	(https://blog.csdn.net/liwei16611/article/details/53148066)
+	fts_ts_probe_entry
+		if (ts_data->ts_workqueue) {
+        	INIT_WORK(&ts_data->resume_work, fts_resume_work); 
+    	}
+    	ts_data->fb_notif.notifier_call = fb_notifier_callback;  // 注册背光的通知链表
+    	ret = fb_register_client(&ts_data->fb_notif);
+    	if (ret) {
+        	FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
+    	}
+		
+		fb_notifier_callback
+			FB_EVENT_BLANK
+				queue_work(fts_data->ts_workqueue, &fts_data->resume_work);  // 唤醒系统
+					fts_ts_resume
+						fts_release_all_finger
+						fts_reset_proc
+						fts_wait_tp_to_valid
+						fts_ex_mode_recovery
+			FB_EARLY_EVENT_BLANK
+				fts_ts_suspend(ts_data->dev)                                 // 休眠
+					fts_esdcheck_suspend                                     // 关闭ESD
+				fts_gesture_suspend                                          // 休眠之后可能还需要使能手势识别功能
+				fts_write_reg(FTS_REG_POWER_MODE, FTS_REG_POWER_MODE_SLEEP); // 写寄存器让TP进入休眠模式
+				
+
+### 虚拟按键的原理，就是在处理TP数据的时候，判断一下，TP触摸的点十分在这个区域如果在这个区域就上报对应的按键值,手势识别是在TP发送的一帧数据当中，从中的某几个字节获取识别到的字母，之后再上报上去
+
+### TP开短路测试
+	1，确认在器件测试时所有的信号引脚都与测试系统相应的通道在电性能上完成了连接
+	2，快速发现芯片的各引脚间是否有短路
+	3，检测出引脚的静电损坏及制造缺陷
+	4，还能测试排线接触是否良好
 
 
+### 固件升级失败，跟reset拉高持续的时间不够有关，没有达到200ms
+
+### I2C接口的数据传递过程
+	fts_i2c_read:
+	struct i2c_client *client;
+	struct i2c_msg msgs;
+	struct i2c_msg msgs[] = {
+		{
+			.addr = client->addr,
+			.flags = 0,
+			.len = writelen,
+			.buf = writebuf,
+		},
+		{
+			.addr = client->addr,
+			.flags = I2C_M_RD,
+			.len = readlen,
+			.buf = readbuf,
+		},
+	};
+	ret = i2c_transfer(client->adapter, msgs, 2);
+		adap->algo->master_xfer(adap, msgs, num);
+	
 
 # Linux基础知识
 	使用likely(),执行if后面的语句的机会更大，使用unlikely(),执行else后面的语句机会更大一些。
