@@ -19,7 +19,9 @@
 |   |---4-高通sensor.md                                     高通平台sensor框架图
 |   |
 |   |---5-qxdm抓取sensor-log.md                             高通sensor抓取log
-|
+|   |
+|   |
+|   |---6-QCOM-LCD-Bringup.md                               总结LCD、TP相关的调试总结
 |
 |
 |---3-mtk
