@@ -37,9 +37,83 @@
 ### 软件流程
 ![墩泰代码架构](https://github.com/zzb2760715357/Picture/blob/master/3-misc/2.jpg)
 
-	设备节点:/sys/bus/i2c/drivers/fts_ts/3-0038
+#### 设备节点:/sys/bus/i2c/drivers/fts_ts/3-0038
 
-	墩泰Focaltech_touch FT3528
+### linux下SPI结构主要通讯的流程如下:
+	struct spi_message msg;
+	struct spi_device *spi
+
+	memset(&xfer[0], 0, sizeof(struct spi_transfer));
+    memset(&xfer[1], 0, sizeof(struct spi_transfer));
+
+	spi_message_init(&msg);
+	xfer[0].tx_buf = &tx_buf[0];
+    xfer[0].rx_buf = &rx_buf[0];
+    xfer[0].len = 1;
+    xfer[0].delay_usecs = DELAY_AFTER_FIRST_BYTE;
+	spi_message_add_tail(&xfer[0], &msg);
+
+	spi_sync(spi, &msg);
+
+### 重要的结构体:
+	static struct spi_driver fts_ts_driver = {
+	    .probe = fts_ts_probe,
+	    .remove = fts_ts_remove,
+	    .driver = {
+	        .name = FTS_DRIVER_NAME,
+	        .owner = THIS_MODULE,
+	        .of_match_table = of_match_ptr(fts_dt_match),
+	    },
+	    .id_table = fts_ts_id,
+	};
+
+	struct fts_ts_platform_data {
+	    u32 irq_gpio;
+	    u32 irq_gpio_flags;
+	    u32 reset_gpio;
+	    u32 reset_gpio_flags;
+	    bool have_key;
+	    u32 key_number;
+	    u32 keys[FTS_MAX_KEYS];
+	    u32 key_y_coords[FTS_MAX_KEYS];
+	    u32 key_x_coords[FTS_MAX_KEYS];
+	    u32 x_max;
+	    u32 y_max;
+	    u32 x_min;
+	    u32 y_min;
+	    u32 max_touch_number;
+	};
+
+	手势识别重要的结构体:
+	/*****************************************************************************/
+	/*
+	 * gesture_id    - mean which gesture is recognised
+	 * point_num     - points number of this gesture
+	 * coordinate_x  - All gesture point x coordinate
+	 * coordinate_y  - All gesture point y coordinate
+	 * mode          - gesture enable/disable, need enable by host
+	 *               - 1:enable gesture function(default)  0:disable
+	 * active        - gesture work flag,
+	 *                 always set 1 when suspend, set 0 when resume
+	 */
+	struct fts_gesture_st {
+	    u8 gesture_id;
+	    u8 point_num;
+	    u16 coordinate_x[FTS_GESTURE_POINTS_MAX];
+	    u16 coordinate_y[FTS_GESTURE_POINTS_MAX];
+	};
+
+	struct ts_event {
+	    int x;      /*x coordinate */
+	    int y;      /*y coordinate */
+	    int p;      /* pressure */
+	    int flag;   /* touch event flag: 0 -- down; 1-- up; 2 -- contact */
+	    int id;     /*touch ID */
+	    int area;
+	};
+
+
+### DTS的配置 墩泰Focaltech_touch FT3528
 
 	I2C通讯方式设备树的配置
 	i2c@f9927000 { 
@@ -88,7 +162,7 @@
 		};
 	}; 
 
-	代码流程:
+### fts_ts_init代码流程:
 		fts_ts_init
 			spi_register_driver(&fts_ts_driver); // 主要是注册struct spi_driver这个结构体
 				fts_ts_probe
@@ -164,8 +238,7 @@
 					    }
 
 
-
-	SPI接口发送数据和读取数据的流程
+### SPI接口发送数据和读取数据的流程
 	1、 fts_fts_writewrite     先发送命令，之后发送数据，无论发送数据还是发送命令，在发送之前需要等待空闲时间才进行
 		fts_read_bootid
 			fts_write                  // 先发送命令，之后发送数据
@@ -187,25 +260,7 @@
 		fts_spi_transfer
 	
 	
-	linux下SPI结构主要通讯的流程如下:
-
-	struct spi_message msg;
-	struct spi_device *spi
-
-	memset(&xfer[0], 0, sizeof(struct spi_transfer));
-    memset(&xfer[1], 0, sizeof(struct spi_transfer));
-
-	spi_message_init(&msg);
-	xfer[0].tx_buf = &tx_buf[0];
-    xfer[0].rx_buf = &rx_buf[0];
-    xfer[0].len = 1;
-    xfer[0].delay_usecs = DELAY_AFTER_FIRST_BYTE;
-	spi_message_add_tail(&xfer[0], &msg);
-
-	spi_sync(spi, &msg);
-
-
-	3、 fts_esdcheck_init 的流程
+### fts_esdcheck_init的流程
 		fts_esdcheck_init
 			INIT_DELAYED_WORK(&ts_data->esdcheck_work, esdcheck_func);
 			fts_esdcheck_switch(ENABLE);
@@ -225,7 +280,7 @@
 						fts_tp_state_recovery        // 复位之后等待TP状态的恢复
 
 		
-	4、 报点上报的流程.
+###	报点上报的流程.
 		fts_irq_handler
 			fts_irq_read_report
 				fts_esdcheck_set_intr
@@ -261,62 +316,7 @@
 
 
 
-	重要的结构体:
-	static struct spi_driver fts_ts_driver = {
-	    .probe = fts_ts_probe,
-	    .remove = fts_ts_remove,
-	    .driver = {
-	        .name = FTS_DRIVER_NAME,
-	        .owner = THIS_MODULE,
-	        .of_match_table = of_match_ptr(fts_dt_match),
-	    },
-	    .id_table = fts_ts_id,
-	};
-
-	struct fts_ts_platform_data {
-	    u32 irq_gpio;
-	    u32 irq_gpio_flags;
-	    u32 reset_gpio;
-	    u32 reset_gpio_flags;
-	    bool have_key;
-	    u32 key_number;
-	    u32 keys[FTS_MAX_KEYS];
-	    u32 key_y_coords[FTS_MAX_KEYS];
-	    u32 key_x_coords[FTS_MAX_KEYS];
-	    u32 x_max;
-	    u32 y_max;
-	    u32 x_min;
-	    u32 y_min;
-	    u32 max_touch_number;
-	};
-
-	手势识别重要的结构体:
-	/*****************************************************************************/
-	/*
-	 * gesture_id    - mean which gesture is recognised
-	 * point_num     - points number of this gesture
-	 * coordinate_x  - All gesture point x coordinate
-	 * coordinate_y  - All gesture point y coordinate
-	 * mode          - gesture enable/disable, need enable by host
-	 *               - 1:enable gesture function(default)  0:disable
-	 * active        - gesture work flag,
-	 *                 always set 1 when suspend, set 0 when resume
-	 */
-	struct fts_gesture_st {
-	    u8 gesture_id;
-	    u8 point_num;
-	    u16 coordinate_x[FTS_GESTURE_POINTS_MAX];
-	    u16 coordinate_y[FTS_GESTURE_POINTS_MAX];
-	};
-
-	struct ts_event {
-	    int x;      /*x coordinate */
-	    int y;      /*y coordinate */
-	    int p;      /* pressure */
-	    int flag;   /* touch event flag: 0 -- down; 1-- up; 2 -- contact */
-	    int id;     /*touch ID */
-	    int area;
-	};
+	
 
 
 
