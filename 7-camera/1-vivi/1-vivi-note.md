@@ -166,10 +166,12 @@
 
 	vidioc_s_fmt_vid_cap      // 设置数据的格式
 
-	vidioc_reqbufs            // 分配缓冲区
-		__vb2_queue_free      // 释放buffer
+	vidioc_reqbufs            // 分配缓冲区,只分配了头部的信息
 		
 	vidioc_querybuf           // 查询缓冲区的信息
+		vb2_querybuf          // 获得缓冲器的数据格式、大小、每一行长度、高度
+
+	vivi_thread_tick          // 构造数据以及产生数据
 		    
 		
 
